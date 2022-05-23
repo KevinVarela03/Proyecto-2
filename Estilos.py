@@ -2,7 +2,7 @@ BACKGROUND1 = '#8DEEEE'
 BACKGROUND2 = 'white'
 BACKGROUND3 = '#CDC9C9'
 BACKGROUND4 = 'Red'
-BACKGROUND5 = '#00B2EE	'
+BACKGROUND5 = '#00B2EE    '
 FONT1 = ('Arial', 16)
 FONT2 = ('Arial', 14)
 FONT3 = ('Arial', 12)
@@ -13,7 +13,7 @@ TEXT2 = '#104E8B'
 ACTIVIDADES = {
         'font' : FONT2,
         'bg' : BACKGROUND5,
-        'fg' : TEXT       
+        'fg' : TEXT
         }
 
 STYLE  = {
@@ -22,7 +22,7 @@ STYLE  = {
         'fg' : TEXT
         }
 
-LABELS = {        
+LABELS = {
         'font' : FONT2,
         'bg' : BACKGROUND1,
         'fg' : TEXT
@@ -50,13 +50,10 @@ CAJA = {
         'font' : FONT2,
         'bg' : BACKGROUND2,
         'fg' : TEXT,
-        }               
+        }
 
-LABEL_1 = {        
+LABEL_1 = {
         'font' : FONT3,
         'bg' : BACKGROUND1,
         'fg' : TEXT2
         }
-
-
-        

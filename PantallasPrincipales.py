@@ -1,3 +1,4 @@
+
 from tkinter import *
 import tkinter as tk
 from tkinter import ttk
@@ -5,14 +6,24 @@ from tkinter import messagebox
 import Estilos
 from tkinter.messagebox import showinfo
 from tkcalendar import DateEntry
+import pickle
 
+global cursos_estudiante
+global carrera_estudiante
+global actividades
+global estudiantec
 cursos = []
 carreras = []
-cursos_posibles = []
 cursos_estudiante = []
 actividades = []
+estudiantes = []
+carrera_estudiante = None
+estudiantec = None
+
+lista_estudiantes = []
 lista_usuarios_estudiantes = []
 lista_usuarios_admin = []
+
 dias = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo']
 lista_actividades = []
 horas_dias = {
@@ -81,6 +92,50 @@ class UsuariosEstudiante:
         self.usuario = usuario
         self.contraseña = contraseña
 
+
+class estudiante_class:
+
+    carrera_estudiante = None
+    cursos_estudiante = None
+    actividades = None
+
+    def __init__(self,usuario,carrera_estudiante,cursos_estudiante,actividades):
+        self.usuario = usuario
+        self.carrera_estudiante = carrera_estudiante
+        self.cursos_estudiante = cursos_estudiante
+        self.actividades = actividades
+
+
+
+def guardar_archivos():
+
+    fichero_binario_cursos = open('cursos','wb') #Crear o abrir el archivo donde se van a guardar las cosas        fichero binario la variable con la que se trabaja pero el archivo no se guarda asi
+    fichero_binario_carreras = open('carreras','wb')
+    fichero_binario_lista_estudiantes = open('lista_estudiantes','wb')
+    fichero_binario_usuarios_admin = open('usuarios_admin','wb')
+    fichero_binario_usuarios_estudiantes = open('usuarios_estudiantes','wb')
+
+
+    pickle.dump(cursos,fichero_binario_cursos)   # primer valor = Guardar la lista que se le indica         segundo valor el fichero que se abrió en la linea anterior (fichero binario)
+    pickle.dump(carreras,fichero_binario_carreras)
+    pickle.dump(lista_estudiantes,fichero_binario_lista_estudiantes)
+    pickle.dump(lista_usuarios_admin,fichero_binario_usuarios_admin)
+    pickle.dump(lista_usuarios_estudiantes,fichero_binario_usuarios_estudiantes)
+
+    fichero_binario_cursos.close()      #siempre se cierra
+    fichero_binario_carreras.close()
+    fichero_binario_lista_estudiantes.close()
+    fichero_binario_usuarios_admin.close()
+    fichero_binario_usuarios_estudiantes.close()
+
+    del (fichero_binario_carreras)
+
+
+def auto_guardado():
+    messagebox.showinfo(message='El auto guardado no es compatible con su sistema', title='Alerta')
+
+
+
 programacion = curso_class('Programacion','4','5','06/01/2022','06/02/2022','Lunes','17:00','19:00')
 cursos.append(programacion)
 comunicacion = curso_class('Comunicacion','2','3','10/06/2022','10/07/2022','Martes','18:00','20:00')
@@ -97,6 +152,8 @@ carreras.append(Ingenieria_electrica)
 computacion.agregar_curso(programacion)
 computacion.agregar_curso(comunicacion)
 Ingenieria_electrica.agregar_curso(comunicacion)
+
+
 
 class actividades_class:
     nombre = None
@@ -177,6 +234,8 @@ def administrador():
                 combo_opciones['state'] = 'readonly'
                 combo_opciones.place(x = 370, y = 140, width= 260, height=23)
 
+                boton_guardar = tk.Button(ventana_admin, text = "Guardar", command= guardar_archivos ,**Estilos.BOTONES).place(x =640, y = 260)
+                check_guardar = tk.Checkbutton(ventana_admin,text= 'Autoguardado',command=auto_guardado).place(x =400, y=260)
                 boton_regresar = tk.Button(ventana_admin, text = "Regresar a la pantalla inicial", command=lambda:[mostrar(ventana_inicial), esconder(ventana_admin)], **Estilos.BOTONES).place(x =20, y = 260)
                 boton_ingresar = tk.Button(ventana_admin, text = "Seleccionar", command=lambda:[admin_cursos(), esconder(ventana_admin)],**Estilos.BOTONES).place(x =640, y = 138)
                 break
@@ -725,10 +784,13 @@ def usuarios_estudiantes():
 
 ## Menu principal Estudiante
 def estudiante():
+    global estudiantec
     global sv_opciones_estudiantes
     for x in lista_usuarios_estudiantes:
         if x.usuario == sv_usuario_estudiante.get():
             if x.contraseña == sv_contraseña_estudiante.get():
+                estudiantec = x
+
                 ventana_usuario = Toplevel(ventana_inicial)
                 ventana_usuario.title('Sistema de Administración del Tiempo')
                 ventana_usuario.minsize(700,300)
@@ -754,6 +816,8 @@ def estudiante():
 
                 boton_regresar = tk.Button(ventana_usuario, text = "Regresar a la pantalla inicial", command=lambda:[mostrar(ventana_inicial),esconder(ventana_usuario)],**Estilos.BOTONES).place(x =20, y = 260)
                 boton_ingresar = tk.Button(ventana_usuario, text = "Seleccionar", command=lambda:[estudiante_carreras(), esconder(ventana_usuario)],**Estilos.BOTONES).place(x =575, y = 138)
+                check_guardar = tk.Checkbutton(ventana_usuario,text= 'Autoguardado',command=auto_guardado).place(x =400, y=260)
+                boton_guardar = tk.Button(boton_ingresar = tk.Button(ventana_usuario, text = "Guardar", command=guardar_archivos,**Estilos.BOTONES).place(x =575, y = 260))
             else:
                 messagebox.showinfo(message='¡¡¡SU USUARIO O CONTRASEÑA SON INCORRECTOS!!!', title='Alerta')
                 mostrar(ventana_usuario)
@@ -769,7 +833,6 @@ def estudiante_carreras():
     global carrera_estudiante
     global carrera_activa
     carrera_activa = False
-
     def elegir_carrera_estudiante():
         carrera = tkvarq_carrera_estudiante.get()
         if carrera == '':
@@ -779,6 +842,9 @@ def estudiante_carreras():
                 if x.nombre == carrera:
                     global carrera_estudiante
                     carrera_estudiante = x
+            
+                    
+
                     break
             try:
                 if carrera_activa == False:
@@ -787,9 +853,8 @@ def estudiante_carreras():
                 carrera_matriculada = tk.Label(ventana_usuario_carrera, text = '''''''''''''''''''''''', **Estilos.LABEL_1).place(x = 20, y = 205,width=500, height=50)
                 carrera_matriculada_texto = tk.Label(ventana_usuario_carrera, text = 'Carrera matriculada: ' , **Estilos.LABELS).place(x = 20, y = 205)
                 carrera_matriculada = tk.Label(ventana_usuario_carrera, text = carrera_estudiante , **Estilos.LABEL_1).place(x = 200, y = 208)
-                carrera_activa = True
                 cursos_estudiante = []
-
+                carrera_activa = True
     def darse_de_baja():
         global carrera_estudiante
         try:
@@ -846,39 +911,39 @@ def estudiante_carreras():
 
 ## Matricular cursos
 def estudiante_cursos():
-    global lista_cursos
-    def matricular_curso():
-        curso_elegido = tkvarq_cursos_estudiante.get()
-        for x in cursos:
-            if curso_elegido == x.nombre:
-                curso_elegido = x
-                break
-        if curso_elegido in cursos_estudiante:
-            messagebox.showinfo(message='¡Este curso ya fue matriculado!', title='Alerta')
-        else:
-            cursos_estudiante.append(curso_elegido)
-        lista_cursos = Listbox(ventana_usuario_cursos)
-        for x in cursos_estudiante:
-            lista_cursos.insert(END,x)
-        lista_cursos.place(x = 205, y = 180, height=75)
-        
-
-    def desmatricular_curso():
-        curso_elegido = tkvarq_cursos_estudiante.get()
-        for x in cursos:
-            if curso_elegido == x.nombre:
-                curso_elegido = x
-                break
-        if curso_elegido in cursos_estudiante:
-            cursos_estudiante.remove(curso_elegido)
-        else:
-            messagebox.showinfo(message='¡Este curso no ha sido matriculado!', title='Alerta')
-        lista_cursos = Listbox(ventana_usuario_cursos)
-        for x in cursos_estudiante:
-            lista_cursos.insert(END,x)
-        lista_cursos.place(x = 205, y = 180, height=75)
-        
     try:
+        def matricular_curso():
+            curso_elegido = tkvarq_cursos_estudiante.get()
+            for x in cursos:
+                if curso_elegido == x.nombre:
+                    curso_elegido = x
+                    break
+            if curso_elegido in cursos_estudiante:
+                messagebox.showinfo(message='¡Este curso ya fue matriculado!', title='Alerta')
+            else:
+                cursos_estudiante.append(curso_elegido)
+            lista_cursos = Listbox(ventana_usuario_cursos)
+            for x in cursos_estudiante:
+                lista_cursos.insert(END,x)
+            lista_cursos.place(x = 205, y = 180, height=75)
+
+
+        def desmatricular_curso():
+            curso_elegido = tkvarq_cursos_estudiante.get()
+            for x in cursos:
+                if curso_elegido == x.nombre:
+                    curso_elegido = x
+                    break
+            if curso_elegido in cursos_estudiante:
+                cursos_estudiante.remove(curso_elegido)
+            else:
+                messagebox.showinfo(message='¡Este curso no ha sido matriculado!', title='Alerta')
+            lista_cursos = Listbox(ventana_usuario_cursos)
+            for x in cursos_estudiante:
+                lista_cursos.insert(END,x)
+            lista_cursos.place(x = 205, y = 180, height=75)
+
+
         ventana_usuario_cursos= Toplevel(ventana_inicial)
         ventana_usuario_cursos.title('Sistema de Administración del Tiempo')
         ventana_usuario_cursos.minsize(700,300)
@@ -892,6 +957,7 @@ def estudiante_cursos():
 
         instruccion1 = tk.Label(ventana_usuario_cursos, text = "Seleccione los cursos que desea matricular:" , **Estilos.LABELS).place(x = 20, y = 135)  
         cursos_matriculados_label = tk.Label(ventana_usuario_cursos, text = "Cursos matriculados:" , **Estilos.LABELS).place(x = 20, y = 180)
+        global lista_cursos
         lista_cursos = Listbox(ventana_usuario_cursos)
         for x in cursos_estudiante:
             lista_cursos.insert(END,x)
@@ -908,7 +974,8 @@ def estudiante_cursos():
     except:
         esconder(ventana_usuario_cursos)
         messagebox.showinfo(message='¡No ha matriculado niguna carrera!', title='Alerta')
-        estudiante()   
+        estudiante()
+    
 
 ## Agregar actividades
 def agregar_actividades():
@@ -1318,11 +1385,13 @@ ventana_inicial.resizable(False, False)
 ventana_inicial.configure(background=Estilos.BACKGROUND1)
 ventana_inicial.title('Sistema de Administración del Tiempo')
 
+
 usuario_final = UsuariosAdmin('Kevin', 'Varela', 'Rojas', '64363005', '123', '123')
 lista_usuarios_admin.append(usuario_final)
 
 usuario_final = UsuariosEstudiante('Anthony', 'Jiménez', 'Zamora', '62713210', '12', '12')
 lista_usuarios_estudiantes.append(usuario_final)
+
 
 actividad = actividades_class('Tarea #1', 'Hacer tarea de introducción', 'Introducción a la Programación', '22/5/22', '22/5/22', 'Domingo', 2, 'Pendiente')
 lista_actividades.append(actividad)
@@ -1345,5 +1414,25 @@ boton_principal = tk.Button(ventana_inicial,
                             command=lambda:[usuarios_admin(),esconder(ventana_inicial)], 
                             **Estilos.BOTONES
                             ).place(x = 495, y = 128)
+
+
+
+
+
+
+archivo_cursos = open('cursos','rb')
+archivo_carreras = open('carreras','rb')
+archivo_lista_estudiantes = open('lista_estudiantes','rb')
+archivo_usuarios_admin = open('usuarios_admin','rb')
+archivo_usuarios_estudiantes = open('usuarios_estudiantes','rb')
+
+cursos = pickle.load(archivo_cursos)
+carreras = pickle.load(archivo_carreras)
+lista_estudiantes = pickle.load(archivo_lista_estudiantes)
+lista_usuarios_admin = pickle.load(archivo_usuarios_admin)
+lista_usuarios_estudiantes = pickle.load(archivo_usuarios_estudiantes)
+
+
+
 
 ventana_inicial.mainloop()
